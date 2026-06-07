@@ -138,7 +138,11 @@ Prompt History:
 
 ### Codex
 
-```json
+Codex hooks are enabled by default. To install the `ayumi` prompt recorder for this repository, create `.codex/hooks.json` at the repository root:
+
+```sh
+mkdir -p .codex
+cat > .codex/hooks.json <<'EOF'
 {
   "hooks": {
     "UserPromptSubmit": [
@@ -153,7 +157,31 @@ Prompt History:
     ]
   }
 }
+EOF
 ```
+
+Use a full path if the `ayumi` binary is not on the `PATH` seen by Codex:
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/absolute/path/to/ayumi add"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Start Codex in the repository, then run `/hooks` in the Codex CLI to review and trust the new `UserPromptSubmit` hook. Codex skips non-managed hooks until their exact definitions are trusted, and changed hook definitions need to be reviewed again.
+
+To install the same hook for every repository, put the same JSON in `~/.codex/hooks.json` instead of `<repo>/.codex/hooks.json`.
 
 ### Git
 

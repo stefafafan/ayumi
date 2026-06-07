@@ -1,0 +1,10 @@
+# Local binary produced by `go build -o ayumi .`
+/ayumi
+
+# Go test and coverage artifacts
+*.test
+coverage.out
+
+# Local build output
+/bin/
+/dist/

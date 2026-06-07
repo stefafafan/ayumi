@@ -69,7 +69,7 @@ heading = "Prompt History"
 	}
 
 	got := readFile(t, msg)
-	want := "feat: add JWT middleware\n\nPrompt History:\n- JWT認証を追加して\n- middlewareに切り出して\n"
+	want := "feat: add JWT middleware\n\nPrompt History:\n> JWT認証を追加して\n\n> middlewareに切り出して\n"
 	if got != want {
 		t.Fatalf("commit message:\n--- got ---\n%s--- want ---\n%s", got, want)
 	}
@@ -144,7 +144,7 @@ func TestInjectPreservesMultilinePromptText(t *testing.T) {
 	}
 
 	got := readFile(t, msg)
-	want := "feat: auth\n\nAI Instructions:\n- JWT認証を追加して\n  issuer/audienceも検証して\n"
+	want := "feat: auth\n\nAI Instructions:\n> JWT認証を追加して\n> issuer/audienceも検証して\n"
 	if got != want {
 		t.Fatalf("commit message:\n--- got ---\n%s--- want ---\n%s", got, want)
 	}
@@ -165,7 +165,7 @@ func TestInjectHandlesLargePromptWithoutTruncation(t *testing.T) {
 	}
 
 	got := readFile(t, msg)
-	if !strings.Contains(got, "- "+prompt+"\n") {
+	if !strings.Contains(got, "> "+prompt+"\n") {
 		t.Fatalf("large prompt was not preserved in commit message")
 	}
 }

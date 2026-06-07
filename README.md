@@ -72,12 +72,14 @@ During rebase, cherry-pick, merge, and revert operations, `ayumi inject` does no
 feat: add JWT middleware
 
 AI Instructions:
-- Add JWT authentication
-- Move it into middleware
-- Validate issuer and audience
+> Add JWT authentication
+
+> Move it into middleware
+
+> Validate issuer and audience
 ```
 
-Prompts are inserted as recorded. Multiline prompts are preserved as continuation lines under the same bullet.
+Prompts are inserted as recorded. Each prompt is inserted as a Markdown quote block, with a blank line between prompts.
 
 ## Storage
 
@@ -114,7 +116,7 @@ heading = "Prompt History"
 feat: add JWT middleware
 
 Prompt History:
-- Add JWT authentication
+> Add JWT authentication
 ```
 
 ## Hook Setup

@@ -445,23 +445,22 @@ func appendInstructionSection(message, heading string, entries []promptEntry) st
 		base += "\n\n"
 	}
 	base += heading + ":\n"
-	for _, entry := range entries {
-		base += bulletPrompt(entry.Prompt)
+	for i, entry := range entries {
+		if i > 0 {
+			base += "\n"
+		}
+		base += quotePrompt(entry.Prompt)
 	}
 	return base
 }
 
-func bulletPrompt(prompt string) string {
+func quotePrompt(prompt string) string {
 	prompt = strings.ReplaceAll(prompt, "\r\n", "\n")
 	prompt = strings.ReplaceAll(prompt, "\r", "\n")
 	lines := strings.Split(prompt, "\n")
 	var b strings.Builder
-	for i, line := range lines {
-		if i == 0 {
-			b.WriteString("- ")
-		} else {
-			b.WriteString("  ")
-		}
+	for _, line := range lines {
+		b.WriteString("> ")
 		b.WriteString(line)
 		b.WriteByte('\n')
 	}

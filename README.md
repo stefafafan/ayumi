@@ -4,6 +4,10 @@
 
 It records only user instructions. It does not store AI responses, transcripts, reasoning, or tool output.
 
+## Privacy Warning
+
+`ayumi` can copy your prompts into Git commit messages. Commit messages may be pushed to public repositories, shared with collaborators, mirrored, indexed, or kept in Git history permanently. Do not include secrets, credentials, private customer data, or anything else you would not want published in prompts that may be recorded by `ayumi`.
+
 ## Flow
 
 ```text

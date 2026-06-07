@@ -121,52 +121,9 @@ Prompt History:
 
 ## Hook Setup
 
-`ayumi` does not install hooks automatically.
+### Claude Code / Codex
 
-### Claude Code
-
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ayumi add"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### Codex
-
-Codex hooks are enabled by default. To install the `ayumi` prompt recorder for this repository, create `.codex/hooks.json` at the repository root:
-
-```sh
-mkdir -p .codex
-cat > .codex/hooks.json <<'EOF'
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ayumi add"
-          }
-        ]
-      }
-    ]
-  }
-}
-EOF
-```
-
-Use a full path if the `ayumi` binary is not on the `PATH` seen by Codex:
+Setup the hooks for `UserPromptSubmit` hook like this:
 
 ```json
 {
@@ -185,49 +142,12 @@ Use a full path if the `ayumi` binary is not on the `PATH` seen by Codex:
 }
 ```
 
-Start Codex in the repository, then run `/hooks` in the Codex CLI to review and trust the new `UserPromptSubmit` hook. Codex skips non-managed hooks until their exact definitions are trusted, and changed hook definitions need to be reviewed again.
-
-To install the same hook for every repository, put the same JSON in `~/.codex/hooks.json` instead of `<repo>/.codex/hooks.json`.
-
 ### Git
 
-#### Per-repository hook
-
-Create `.git/hooks/prepare-commit-msg`:
-
-```sh
-#!/bin/sh
-
-ayumi inject "$1"
-```
-
-Make it executable:
-
-```sh
-chmod +x .git/hooks/prepare-commit-msg
-```
-
-#### Global Git hook
-
-To run `ayumi inject` for commits in every repository, configure a global Git hooks directory:
-
-```sh
-mkdir -p ~/.config/git/hooks
-cat > ~/.config/git/hooks/prepare-commit-msg <<'EOF'
-#!/bin/sh
-
-ayumi inject "$1"
-EOF
-chmod +x ~/.config/git/hooks/prepare-commit-msg
-git config --global core.hooksPath ~/.config/git/hooks
-```
-
-Use a full path to the binary if `ayumi` is not on the `PATH` seen by Git:
+Create a `prepare-commit-msg` like this, and make it an executable. Set it as a global hook if needed.
 
 ```sh
 #!/bin/sh
 
 /absolute/path/to/ayumi inject "$1"
 ```
-
-`core.hooksPath` replaces Git's default `.git/hooks` lookup. If you already use a global hooks directory, add the `prepare-commit-msg` script there instead of changing `core.hooksPath`.

@@ -185,6 +185,8 @@ To install the same hook for every repository, put the same JSON in `~/.codex/ho
 
 ### Git
 
+#### Per-repository hook
+
 Create `.git/hooks/prepare-commit-msg`:
 
 ```sh
@@ -192,3 +194,34 @@ Create `.git/hooks/prepare-commit-msg`:
 
 ayumi inject "$1"
 ```
+
+Make it executable:
+
+```sh
+chmod +x .git/hooks/prepare-commit-msg
+```
+
+#### Global Git hook
+
+To run `ayumi inject` for commits in every repository, configure a global Git hooks directory:
+
+```sh
+mkdir -p ~/.config/git/hooks
+cat > ~/.config/git/hooks/prepare-commit-msg <<'EOF'
+#!/bin/sh
+
+ayumi inject "$1"
+EOF
+chmod +x ~/.config/git/hooks/prepare-commit-msg
+git config --global core.hooksPath ~/.config/git/hooks
+```
+
+Use a full path to the binary if `ayumi` is not on the `PATH` seen by Git:
+
+```sh
+#!/bin/sh
+
+/absolute/path/to/ayumi inject "$1"
+```
+
+`core.hooksPath` replaces Git's default `.git/hooks` lookup. If you already use a global hooks directory, add the `prepare-commit-msg` script there instead of changing `core.hooksPath`.

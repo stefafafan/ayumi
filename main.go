@@ -11,14 +11,21 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
 )
 
 const (
-	defaultHeading = "AI Instructions"
+	defaultHeading     = "AI Instructions"
+	developmentVersion = "dev"
 )
+
+var version = developmentVersion
+
+var releaseVersionPattern = regexp.MustCompile(`^v[0-9]+\.[0-9]+\.[0-9]+$`)
 
 type config struct {
 	StorageDir string
@@ -38,13 +45,23 @@ type gitContext struct {
 }
 
 func main() {
-	os.Exit(run(os.Args[1:], os.Stdin, os.Stderr))
+	os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
 }
 
-func run(args []string, stdin io.Reader, stderr io.Writer) int {
+func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(stderr, "usage: ayumi <add|inject> [commit-message-file]")
+		fmt.Fprintln(stderr, "usage: ayumi <add|inject|version> [commit-message-file]")
 		return 2
+	}
+
+	if args[0] == "version" {
+		if len(args) > 1 {
+			printVersionUsage(stderr)
+			fmt.Fprintf(stderr, "\ngot extra arguments: %s\n\n", strings.Join(args[1:], " "))
+			return 2
+		}
+		fmt.Fprintln(stdout, currentVersion())
+		return 0
 	}
 
 	cfg, err := loadConfig()
@@ -79,6 +96,33 @@ func run(args []string, stdin io.Reader, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "unknown command: %s\n", args[0])
 		return 2
 	}
+}
+
+func printVersionUsage(stderr io.Writer) {
+	fmt.Fprintln(stderr, "usage: ayumi version")
+}
+
+func currentVersion() string {
+	buildInfoVersion := ""
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		buildInfoVersion = info.Main.Version
+	}
+	return resolveVersion(version, buildInfoVersion)
+}
+
+func resolveVersion(configuredVersion, buildInfoVersion string) string {
+	if isReleaseVersion(configuredVersion) {
+		return configuredVersion
+	}
+	if isReleaseVersion(buildInfoVersion) {
+		return buildInfoVersion
+	}
+	return developmentVersion
+}
+
+func isReleaseVersion(value string) bool {
+	return releaseVersionPattern.MatchString(value)
 }
 
 func printInjectUsage(stderr io.Writer) {

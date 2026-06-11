@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime/debug"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -211,66 +210,6 @@ func injectInstructions(messagePath string, cfg config) error {
 
 	updated := appendInstructionSection(message, cfg.Heading, entries)
 	return os.WriteFile(messagePath, []byte(updated), 0o644)
-}
-
-func loadConfig() (config, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return config{}, err
-	}
-	cfg := config{
-		StorageDir: filepath.Join(home, ".local", "share", "ayumi"),
-		Heading:    defaultHeading,
-	}
-
-	configHome := os.Getenv("XDG_CONFIG_HOME")
-	if configHome == "" {
-		configHome = filepath.Join(home, ".config")
-	}
-	path := filepath.Join(configHome, "ayumi", "config.toml")
-	b, err := os.ReadFile(path)
-	if errors.Is(err, os.ErrNotExist) {
-		return cfg, nil
-	}
-	if err != nil {
-		return config{}, err
-	}
-
-	scanner := bufio.NewScanner(strings.NewReader(string(b)))
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			continue
-		}
-		parsed, err := parseTomlString(strings.TrimSpace(value))
-		if err != nil {
-			return config{}, fmt.Errorf("parse config %s: %w", path, err)
-		}
-		switch strings.TrimSpace(key) {
-		case "storage_dir":
-			cfg.StorageDir = expandHome(parsed, home)
-		case "heading":
-			cfg.Heading = parsed
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		return config{}, err
-	}
-	if strings.TrimSpace(cfg.Heading) == "" {
-		return config{}, errors.New("heading must not be empty")
-	}
-	return cfg, nil
-}
-
-func parseTomlString(value string) (string, error) {
-	if len(value) >= 2 && value[0] == '"' {
-		return strconv.Unquote(value)
-	}
-	return "", fmt.Errorf("expected quoted string, got %q", value)
 }
 
 func expandHome(path, home string) string {

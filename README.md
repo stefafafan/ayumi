@@ -90,7 +90,19 @@ Setup the hooks for `UserPromptSubmit` hook like this:
 
 ### Git Hooks
 
-Create a `prepare-commit-msg` like this and make it an executable. Set it as a global hook if needed.
+For Git 2.54 or newer, use Git's [config-based hooks](https://git-scm.com/docs/git-hook/2.54.0).
+
+```ini
+[hook "ayumi"]
+        event = prepare-commit-msg
+        command = sh -c '/absolute/path/to/ayumi inject "$1"' ayumi
+```
+
+The `sh -c` wrapper passes only Git's first `prepare-commit-msg` argument to `ayumi inject`. This avoids forwarding extra hook arguments such as `message` from `git commit -m`.
+
+#### Traditional Git Hook File
+
+For older Git versions, create a `prepare-commit-msg` hook file like this and make it executable. Set it as a global hook if needed.
 
 ```sh
 #!/bin/sh

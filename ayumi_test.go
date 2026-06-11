@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"os"
 	"os/exec"
@@ -170,6 +171,25 @@ func TestInjectHandlesLargePromptWithoutTruncation(t *testing.T) {
 	}
 }
 
+func TestInjectReportsExtraArgumentsForConfigBasedHooks(t *testing.T) {
+	home := t.TempDir()
+	repo := initRepo(t)
+	msg := filepath.Join(repo, "COMMIT_EDITMSG")
+
+	code, stderr := runCLIWithStderr(t, repo, home, []string{"inject", msg, "message"}, "")
+	if code != 2 {
+		t.Fatalf("inject exit code = %d, want 2", code)
+	}
+	for _, want := range []string{
+		"usage: ayumi inject <commit-message-file>",
+		"got extra arguments: message",
+	} {
+		if !strings.Contains(stderr, want) {
+			t.Fatalf("stderr missing %q:\n%s", want, stderr)
+		}
+	}
+}
+
 func TestAddRejectsEmptyPrompt(t *testing.T) {
 	home := t.TempDir()
 	repo := initRepo(t)
@@ -207,22 +227,30 @@ func TestAddRejectsStorageDirectoryInsideRepository(t *testing.T) {
 
 func runCLI(t *testing.T, repo, home string, args []string, stdin string) int {
 	t.Helper()
+	code, _ := runCLIWithStderr(t, repo, home, args, stdin)
+	return code
+}
+
+func runCLIWithStderr(t *testing.T, repo, home string, args []string, stdin string) (int, string) {
+	t.Helper()
 	cmd := exec.Command(testBinary(t), args...)
 	cmd.Dir = repo
 	cmd.Stdin = strings.NewReader(stdin)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 	cmd.Env = append(os.Environ(),
 		"HOME="+home,
 		"XDG_CONFIG_HOME="+filepath.Join(home, ".config"),
 	)
 	err := cmd.Run()
 	if err == nil {
-		return 0
+		return 0, stderr.String()
 	}
 	if exitErr, ok := err.(*exec.ExitError); ok {
-		return exitErr.ExitCode()
+		return exitErr.ExitCode(), stderr.String()
 	}
 	t.Fatalf("run ayumi: %v", err)
-	return -1
+	return -1, stderr.String()
 }
 
 func testBinary(t *testing.T) string {

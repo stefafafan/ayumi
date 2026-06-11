@@ -61,8 +61,13 @@ func run(args []string, stdin io.Reader, stderr io.Writer) int {
 		}
 		return 0
 	case "inject":
-		if len(args) != 2 {
-			fmt.Fprintln(stderr, "usage: ayumi inject <commit-message-file>")
+		if len(args) < 2 {
+			printInjectUsage(stderr)
+			return 2
+		}
+		if len(args) > 2 {
+			printInjectUsage(stderr)
+			fmt.Fprintf(stderr, "\ngot extra arguments: %s\n\n", strings.Join(args[2:], " "))
 			return 2
 		}
 		if err := injectInstructions(args[1], cfg); err != nil {
@@ -74,6 +79,10 @@ func run(args []string, stdin io.Reader, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "unknown command: %s\n", args[0])
 		return 2
 	}
+}
+
+func printInjectUsage(stderr io.Writer) {
+	fmt.Fprintln(stderr, "usage: ayumi inject <commit-message-file>")
 }
 
 func addPrompt(stdin io.Reader, cfg config) error {

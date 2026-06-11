@@ -20,10 +20,10 @@ heading = "Prompt History"
 	runGit(t, repo, "commit", "-m", "initial")
 	time.Sleep(1100 * time.Millisecond)
 
-	if code := runCLI(t, repo, home, []string{"add"}, "JWT認証を追加して"); code != 0 {
+	if code := runCLI(t, repo, home, []string{"add"}, "Add JWT authentication"); code != 0 {
 		t.Fatalf("add #1 exit code = %d", code)
 	}
-	if code := runCLI(t, repo, home, []string{"add"}, `{"user_prompt":"middlewareに切り出して"}`); code != 0 {
+	if code := runCLI(t, repo, home, []string{"add"}, `{"user_prompt":"Extract it into middleware"}`); code != 0 {
 		t.Fatalf("add #2 exit code = %d", code)
 	}
 
@@ -34,7 +34,7 @@ heading = "Prompt History"
 	}
 
 	got := readFile(t, msg)
-	want := "feat: add JWT middleware\n\nPrompt History:\n> JWT認証を追加して\n\n> middlewareに切り出して\n"
+	want := "feat: add JWT middleware\n\nPrompt History:\n> Add JWT authentication\n\n> Extract it into middleware\n"
 	if got != want {
 		t.Fatalf("commit message:\n--- got ---\n%s--- want ---\n%s", got, want)
 	}
@@ -99,7 +99,7 @@ func TestInjectSkipsRebaseCherryPickMergeAndRevertStates(t *testing.T) {
 func TestInjectPreservesMultilinePromptText(t *testing.T) {
 	home := t.TempDir()
 	repo := initRepo(t)
-	if code := runCLI(t, repo, home, []string{"add"}, "JWT認証を追加して\nissuer/audienceも検証して"); code != 0 {
+	if code := runCLI(t, repo, home, []string{"add"}, "Add JWT authentication\nvalidate issuer and audience too"); code != 0 {
 		t.Fatalf("add exit code = %d", code)
 	}
 	msg := filepath.Join(repo, "COMMIT_EDITMSG")
@@ -109,7 +109,7 @@ func TestInjectPreservesMultilinePromptText(t *testing.T) {
 	}
 
 	got := readFile(t, msg)
-	want := "feat: auth\n\nAI Instructions:\n> JWT認証を追加して\n> issuer/audienceも検証して\n"
+	want := "feat: auth\n\nAI Instructions:\n> Add JWT authentication\n> validate issuer and audience too\n"
 	if got != want {
 		t.Fatalf("commit message:\n--- got ---\n%s--- want ---\n%s", got, want)
 	}
@@ -118,7 +118,7 @@ func TestInjectPreservesMultilinePromptText(t *testing.T) {
 func TestInjectHandlesLargePromptWithoutTruncation(t *testing.T) {
 	home := t.TempDir()
 	repo := initRepo(t)
-	prompt := strings.Repeat("長い指示", 25000)
+	prompt := strings.Repeat("long instruction", 25000)
 	if code := runCLI(t, repo, home, []string{"add"}, prompt); code != 0 {
 		t.Fatalf("add exit code = %d", code)
 	}

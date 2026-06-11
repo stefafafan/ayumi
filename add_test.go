@@ -13,7 +13,7 @@ func TestAddStoresPromptScopedByRepositoryAndBranch(t *testing.T) {
 	runGit(t, repo, "remote", "add", "origin", "git@github.com:owner/repo.git")
 	runGit(t, repo, "checkout", "-b", "feature/auth")
 
-	stdin := `{"prompt":"JWT認証を追加して\nmiddlewareに切り出して"}`
+	stdin := `{"prompt":"Add JWT authentication\nextract it into middleware"}`
 	if code := runCLI(t, repo, home, []string{"add"}, stdin); code != 0 {
 		t.Fatalf("add exit code = %d, want 0", code)
 	}
@@ -30,7 +30,7 @@ func TestAddStoresPromptScopedByRepositoryAndBranch(t *testing.T) {
 	if len(entries) != 1 {
 		t.Fatalf("entries = %d, want 1", len(entries))
 	}
-	if entries[0]["prompt"] != "JWT認証を追加して\nmiddlewareに切り出して" {
+	if entries[0]["prompt"] != "Add JWT authentication\nextract it into middleware" {
 		t.Fatalf("stored prompt = %q", entries[0]["prompt"])
 	}
 	if _, err := time.Parse(time.RFC3339, entries[0]["timestamp"].(string)); err != nil {

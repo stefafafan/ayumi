@@ -39,6 +39,14 @@ If no prompts were recorded after the previous commit, nothing is inserted.
 
 During rebase, cherry-pick, merge, and revert operations, `ayumi inject` does nothing so Git can reuse the existing commit message.
 
+### `ayumi version`
+
+Prints the current `ayumi` version.
+
+```sh
+ayumi version
+```
+
 ## Commit Message Format
 
 ```text
